@@ -2,42 +2,100 @@ import React, { useState } from "react";
 import HeaderForm from "./components/HeaderForm";
 import HomologacionTable from "./components/HomologacionTable";
 import AgregarMateriaModal from "./components/AgregarMateriaModal";
-import GenerarPdfButton from "./components/GenerarPdfButton";
+import ResultadosHomologacion from "./components/ResultadosHomologacion";
+import CalcularHomologacionButton from "./components/CalcularHomologacionButton";
+import { Box, Container } from "@mui/material";
 
-function App() {
-  // Estado global para encabezado y materias
+export default function App() {
   const [header, setHeader] = useState({
     tipoDoc: "",
     cedula: "",
-    nombre: "",
+    nombre: ""
   });
+  const [headerValid, setHeaderValid] = useState(false);
   const [materias, setMaterias] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
+  const [materiaToEdit, setMateriaToEdit] = useState(null);
+  const [resultados, setResultados] = useState(null); // <-- Estado para la respuesta
 
-  const handleAddMateria = (materia) => {
-    setMaterias([...materias, materia]);
+  // Abrir modal para agregar
+  const handleAddMateriaClick = () => {
+    setEditIndex(null);
+    setMateriaToEdit(null);
+    setModalOpen(true);
   };
 
-  return (
-    <div style={{ padding: "2rem" }}>
-      <HeaderForm header={header} setHeader={setHeader} />
-      <div style={{ margin: "2rem 0" }}>
-        <HomologacionTable
-          materias={materias}
-          onAddClick={() => setModalOpen(true)}
+  // Abrir modal para editar
+  const handleUpdateMateria = (idx) => {
+    setEditIndex(idx);
+    setMateriaToEdit(materias[idx]);
+    setModalOpen(true);
+  };
+
+  // Eliminar materia
+  const handleDeleteMateria = (idx) => {
+    setMaterias(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  // Agregar nueva materia
+  const handleAddMateria = (materia) => {
+    setMaterias(prev => [...prev, materia]);
+    setModalOpen(false);
+  };
+
+  // Actualizar materia existente
+  const handleUpdateMateriaConfirm = (materiaActualizada, idx) => {
+    setMaterias(prev =>
+      prev.map((mat, i) => (i === idx ? materiaActualizada : mat))
+    );
+    setModalOpen(false);
+  };
+
+  // Si hay resultados, muestra la vista de resultados y no el formulario
+  if (resultados) {
+    return (
+      <Container maxWidth="md" sx={{ p: 2 }}>
+        <ResultadosHomologacion
+          resultados={resultados}
+          onVolver={() => setResultados(null)}
         />
-        <GenerarPdfButton
+      </Container>
+    );
+  }
+
+  return (
+    <Container maxWidth="md" sx={{ p: 2 }}>
+      <HeaderForm
+        header={header}
+        setHeader={setHeader}
+        setHeaderValid={setHeaderValid}
+      />
+
+      <HomologacionTable
+        materias={materias}
+        onAddClick={handleAddMateriaClick}
+        headerValid={headerValid}
+        onUpdate={handleUpdateMateria}
+        onDelete={handleDeleteMateria}
+      />
+
+      <Box display="flex" justifyContent="center">
+        <CalcularHomologacionButton
           header={header}
           materias={materias}
+          setResultados={setResultados}
         />
-      </div>
+      </Box>
+
       <AgregarMateriaModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onAdd={handleAddMateria}
+        editIndex={editIndex}
+        materiaToEdit={materiaToEdit}
+        onUpdate={handleUpdateMateriaConfirm}
       />
-    </div>
+    </Container>
   );
 }
-
-export default App;

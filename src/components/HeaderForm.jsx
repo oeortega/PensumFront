@@ -1,83 +1,177 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-
-// Puedes cambiar la ruta del logo según donde lo tengas
-import logo from "../assets/logo-uni.png"; // o "../assets/logo-uni.png"
+import {
+  TextField,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Select,
+  FormHelperText,
+  Box,
+  Typography,
+  Button,
+  Snackbar,
+  Alert
+} from "@mui/material";
+import logo from "../assets/logo-uni.png";
 
 const tiposDoc = [
   { value: "CC", label: "Cédula" },
   { value: "TI", label: "Tarjeta de Identidad" },
-  { value: "CE", label: "Cédula de Extranjería" },
+  { value: "CE", label: "Cédula de Extranjería" }
 ];
 
-export default function HeaderForm({ header, setHeader }) {
-  const { register, handleSubmit, formState: { errors } } = useForm({
-    defaultValues: header
+export default function HeaderForm({ header, setHeader, setHeaderValid }) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isValid },
+    watch,
+    reset
+  } = useForm({
+    defaultValues: header,
+    mode: "onChange"
   });
 
-  const onSubmit = (data) => setHeader(data);
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
+
+  React.useEffect(() => {
+    reset(header);
+  }, [header, reset]);
+
+  React.useEffect(() => {
+    setHeaderValid(isValid);
+  }, [isValid, setHeaderValid]);
+
+  const onSubmit = (data) => {
+    setHeader(data);
+    setOpenSnackbar(true); // Mostrar mensaje de éxito
+  };
+
+  const tipoDocValue = watch("tipoDoc") || "";
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: "1rem",
-      width: "100%",
-      maxWidth: "700px",
-      margin: "0 auto"
-    }}>
-      {/* Encabezado con logo y nombre de la institución */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "1rem",
-        width: "100%",
-        flexWrap: "wrap",
-        justifyContent: "center"
-      }}>
-        <img
-          src={logo}
-          alt="Logo Institución"
-          style={{ width: 64, height: 64, objectFit: "contain" }}
-        />
-        <span style={{
-          fontWeight: "bold",
-          fontSize: "1.5rem",
-          textAlign: "center"
-        }}>
-          UNIVERSIDAD NACIONAL DEL CESAR
-        </span>
-      </div>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      width="100%"
+      maxWidth={800}
+      mx="auto"
+      gap={3}
+      padding={2}
+    >
+      <Box display="flex" alignItems="center" gap={2} flexWrap="wrap" justifyContent="center">
+        <img src={logo} alt="Logo Institución" style={{ width: 72, height: 72, objectFit: "contain" }} />
+        <Typography fontWeight="bold" fontSize="1.7rem" textAlign="center">
+          UNIVERSIDAD POPULAR DEL CESAR
+        </Typography>
+      </Box>
 
-      {/* Formulario */}
       <form
-        onBlur={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit)}
         style={{
-          display: "flex",
-          gap: "1rem",
-          marginBottom: "1rem",
-          flexWrap: "wrap",
-          justifyContent: "center"
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: "1.5rem",
+          width: "100%"
         }}
+        autoComplete="off"
       >
-        <select {...register("tipoDoc", { required: true })}>
-          <option value="">Tipo Doc</option>
-          {tiposDoc.map(td => (
-            <option key={td.value} value={td.value}>{td.label}</option>
-          ))}
-        </select>
-        <input
-          {...register("cedula", { required: true, pattern: /^[0-9]+$/ })}
-          placeholder="Cédula"
+        <FormControl
+          error={Boolean(errors.tipoDoc)}
+          size="large"
+          fullWidth
+        >
+          <InputLabel id="tipoDoc-label">Tipo de Documento</InputLabel>
+          <Select
+            labelId="tipoDoc-label"
+            label="Tipo de Documento"
+            value={tipoDocValue}
+            {...register("tipoDoc", { required: "Seleccione el tipo de documento" })}
+            onChange={e => setValue("tipoDoc", e.target.value, { shouldValidate: true })}
+            sx={{ fontSize: "1.1rem" }}
+          >
+            <MenuItem value=""><em>Seleccione...</em></MenuItem>
+            {tiposDoc.map(td => (
+              <MenuItem key={td.value} value={td.value}>{td.label}</MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>
+            {errors.tipoDoc?.message || "Seleccione el tipo de documento"}
+          </FormHelperText>
+        </FormControl>
+
+        <TextField
+          label="Cédula"
+          variant="outlined"
+          type="text"
+          inputProps={{ maxLength: 10, style: { fontSize: "1.1rem" } }}
+          {...register("cedula", {
+            required: "Ingrese la cédula",
+            pattern: {
+              value: /^[0-9]+$/,
+              message: "Solo números"
+            },
+            minLength: { value: 8, message: "Mínimo 8 dígitos" },
+            maxLength: { value: 10, message: "Máximo 10 dígitos" }
+          })}
+          error={Boolean(errors.cedula)}
+          helperText={errors.cedula?.message || "Ingrese solo números (8-10 dígitos)"}
+          fullWidth
         />
-        {errors.cedula && <span style={{ color: "red" }}>Solo números</span>}
-        <input
-          {...register("nombre", { required: true, pattern: /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/ })}
-          placeholder="Nombre completo"
+
+        <TextField
+          label="Nombre completo"
+          variant="outlined"
+          inputProps={{ style: { fontSize: "1.1rem" } }}
+          {...register("nombre", {
+            required: "Ingrese el nombre completo",
+            pattern: {
+              value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/,
+              message: "Solo letras y espacios"
+            }
+          })}
+          error={Boolean(errors.nombre)}
+          helperText={errors.nombre?.message || "Solo letras y espacios"}
+          fullWidth
         />
-        {errors.nombre && <span style={{ color: "red" }}>Solo letras</span>}
+
+        <Box display="flex" alignItems="center" justifyContent="center">
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={!isValid}
+            sx={{
+              height: "56px",
+              backgroundColor: "#1976d2",
+              fontWeight: "bold",
+              fontSize: "1.1rem",
+              paddingX: 3,
+              borderRadius: 2,
+              boxShadow: 3,
+              '&:hover': {
+                backgroundColor: "#125ea6"
+              }
+            }}
+          >
+            Confirmar Datos
+          </Button>
+        </Box>
       </form>
-    </div>
+
+      {/* Snackbar de confirmación */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={() => setOpenSnackbar(false)} severity="success" variant="filled" sx={{ fontSize: "1rem" }}>
+          ¡Datos confirmados correctamente!
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }
