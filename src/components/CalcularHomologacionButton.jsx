@@ -17,7 +17,7 @@ export default function CalcularHomologacionButton({ header, materias, setResult
     try {
       console.log("Payload enviado:", payload);
       alert("JSON que se enviará:\n" + JSON.stringify(payload, null, 2));
-      const response = await fetch("http://localhost:3001/homologacion/calcular", {
+      const response = await fetch("https://backend-pensum-front.onrender.com/homologacion/calcular", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

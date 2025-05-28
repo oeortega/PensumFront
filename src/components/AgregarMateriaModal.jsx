@@ -42,7 +42,7 @@ export default function AgregarMateriaModal({
   useEffect(() => {
     if (open) {
       setLoadingMaterias(true);
-      fetch("http://localhost:3001/homologacion/pensum/viejo")
+      fetch("https://backend-pensum-front.onrender.com/homologacion/pensum/viejo")
         .then(res => {
           if (!res.ok) throw new Error("Error cargando materias");
           return res.json();

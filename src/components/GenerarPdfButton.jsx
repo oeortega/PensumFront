@@ -5,7 +5,7 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 const GenerarPdfButton = () => {
   const handleDownload = async () => {
     try {
-      const response = await fetch("http://localhost:3001/homologacion/reporte/pdf", {
+      const response = await fetch("https://backend-pensum-front.onrender.com/homologacion/reporte/pdf", {
         method: "GET",
         headers: {
           Accept: "application/pdf"
