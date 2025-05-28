@@ -10,8 +10,6 @@ import {
   Slide
 } from "@mui/material";
 
-// Elimina la constante materiasDisponibles, ahora será obtenida desde el API
-
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -25,7 +23,14 @@ const Transition = React.forwardRef(function Transition(props, ref) {
  * - materiaToEdit: (opcional) objeto materia para editar (misma estructura que materia)
  * - onUpdate: (opcional) función ({id, nombre, creditos, semestre, nota}, editIndex) para actualizar materia
  */
-export default function AgregarMateriaModal({ open, onClose, onAdd, editIndex = null, materiaToEdit = null, onUpdate }) {
+export default function AgregarMateriaModal({
+  open,
+  onClose,
+  onAdd,
+  editIndex = null,
+  materiaToEdit = null,
+  onUpdate
+}) {
   const [semestre, setSemestre] = useState("");
   const [materiaId, setMateriaId] = useState("");
   const [nota, setNota] = useState("");
@@ -37,13 +42,20 @@ export default function AgregarMateriaModal({ open, onClose, onAdd, editIndex = 
   useEffect(() => {
     if (open) {
       setLoadingMaterias(true);
-      fetch("https://6438770b1b9a7dd5c951c792.mockapi.io/pensum_anterior") // Cambia esta URL por la de tu API real
+      fetch("http://localhost:3001/homologacion/pensum/viejo")
         .then(res => {
           if (!res.ok) throw new Error("Error cargando materias");
           return res.json();
         })
         .then(data => {
-          setMateriasDisponibles(data);
+          // Normaliza los datos: asegura que cada materia tenga id, nombre, creditos y semestre
+          const materiasNormalizadas = data.map((m, idx) => ({
+            id: m.codigo || m.id || idx.toString(),
+            nombre: m.nombre || m.asignatura || "",
+            creditos: m.creditos || m.credits || 0,
+            semestre: (m.semestre || m.semester || Math.ceil((idx + 1) / 5)).toString() // Asegura string siempre
+          }));
+          setMateriasDisponibles(materiasNormalizadas);
           setLoadingMaterias(false);
         })
         .catch(err => {
@@ -66,28 +78,35 @@ export default function AgregarMateriaModal({ open, onClose, onAdd, editIndex = 
     }
   }, [materiaToEdit, open]);
 
+  // Filtra por semestre si corresponde (string contra string)
   const materiasFiltradas = materiasDisponibles.filter(
-    m =>
-      (!semestre || m.semestre === Number(semestre))
+    m => (!semestre || m.semestre === semestre)
   );
+
+  // Extrae los semestres disponibles de las materias (siempre string)
+  const semestresDisponibles = [...new Set(materiasDisponibles.map(m => m.semestre))].sort((a, b) => Number(a) - Number(b));
 
   const handleConfirm = () => {
     const materia = materiasDisponibles.find(m => m.id === materiaId);
     if (materia && nota) {
-      const materiaObj = { ...materia, nota };
+      const materiaObj = { ...materia, nota: Number(nota) };
       if (editIndex !== null && typeof onUpdate === "function") {
         onUpdate(materiaObj, editIndex);
       } else {
         onAdd(materiaObj);
       }
       onClose();
-      setSemestre(""); setMateriaId(""); setNota("");
+      setSemestre("");
+      setMateriaId("");
+      setNota("");
     }
   };
 
   return (
     <Dialog open={open} onClose={onClose} TransitionComponent={Transition}>
-      <DialogTitle>{editIndex !== null ? "Actualizar asignatura" : "Seleccionar asignatura"}</DialogTitle>
+      <DialogTitle>
+        {editIndex !== null ? "Actualizar asignatura" : "Seleccionar asignatura"}
+      </DialogTitle>
       <DialogContent dividers>
         {loadingMaterias ? (
           <div>Cargando materias...</div>
@@ -103,8 +122,8 @@ export default function AgregarMateriaModal({ open, onClose, onAdd, editIndex = 
               fullWidth
               margin="dense"
             >
-              {[...Array(10).keys()].map(n => (
-                <MenuItem key={n+1} value={n+1}>{n+1}</MenuItem>
+              {semestresDisponibles.map(n => (
+                <MenuItem key={n} value={n}>{n}</MenuItem>
               ))}
             </TextField>
             <TextField
@@ -133,8 +152,15 @@ export default function AgregarMateriaModal({ open, onClose, onAdd, editIndex = 
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary" variant="outlined">Cancelar</Button>
-        <Button onClick={handleConfirm} color="success" variant="contained" disabled={loadingMaterias || errorMaterias}>
+        <Button onClick={onClose} color="secondary" variant="outlined">
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleConfirm}
+          color="success"
+          variant="contained"
+          disabled={loadingMaterias || errorMaterias}
+        >
           {editIndex !== null ? "Actualizar" : "Agregar"}
         </Button>
       </DialogActions>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import {
   TextField,
@@ -9,7 +9,6 @@ import {
   FormHelperText,
   Box,
   Typography,
-  Button,
   Snackbar,
   Alert
 } from "@mui/material";
@@ -35,19 +34,27 @@ export default function HeaderForm({ header, setHeader, setHeaderValid }) {
   });
 
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const autoSubmitted = useRef(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     reset(header);
   }, [header, reset]);
 
-  React.useEffect(() => {
-    setHeaderValid(isValid);
-  }, [isValid, setHeaderValid]);
-
-  const onSubmit = (data) => {
+  const onSubmit = React.useCallback((data) => {
     setHeader(data);
-    setOpenSnackbar(true); // Mostrar mensaje de éxito
-  };
+    setOpenSnackbar(true);
+  }, [setHeader]);
+
+  useEffect(() => {
+    setHeaderValid(isValid);
+    if (isValid && !autoSubmitted.current) {
+      autoSubmitted.current = true;
+      handleSubmit(onSubmit)();
+    }
+    if (!isValid) {
+      autoSubmitted.current = false;
+    }
+  }, [isValid, handleSubmit, onSubmit, setHeaderValid]);
 
   const tipoDocValue = watch("tipoDoc") || "";
 
@@ -70,7 +77,6 @@ export default function HeaderForm({ header, setHeader, setHeaderValid }) {
       </Box>
 
       <form
-        onSubmit={handleSubmit(onSubmit)}
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
@@ -137,28 +143,6 @@ export default function HeaderForm({ header, setHeader, setHeaderValid }) {
           helperText={errors.nombre?.message || "Solo letras y espacios"}
           fullWidth
         />
-
-        <Box display="flex" alignItems="center" justifyContent="center">
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={!isValid}
-            sx={{
-              height: "56px",
-              backgroundColor: "#1976d2",
-              fontWeight: "bold",
-              fontSize: "1.1rem",
-              paddingX: 3,
-              borderRadius: 2,
-              boxShadow: 3,
-              '&:hover': {
-                backgroundColor: "#125ea6"
-              }
-            }}
-          >
-            Confirmar Datos
-          </Button>
-        </Box>
       </form>
 
       {/* Snackbar de confirmación */}

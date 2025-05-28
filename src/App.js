@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import './App.css';
 import HeaderForm from "./components/HeaderForm";
 import HomologacionTable from "./components/HomologacionTable";
 import AgregarMateriaModal from "./components/AgregarMateriaModal";
