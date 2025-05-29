@@ -13,6 +13,8 @@ export default function App() {
     cedula: "",
     nombre: ""
   });
+
+  console.log("HEADER EN BOTÓN:", header);
   const [headerValid, setHeaderValid] = useState(false);
   const [submitHeader, setSubmitHeader] = useState(null); // <-- NUEVO
   const [materias, setMaterias] = useState([]);
@@ -88,7 +90,8 @@ export default function App() {
           header={header}
           materias={materias}
           setResultados={setResultados}
-          submitHeader={submitHeader} // <-- NUEVO
+          submitHeader={submitHeader} 
+          // <-- NUEVO
         />
       </Box>
 
@@ -101,5 +104,8 @@ export default function App() {
         onUpdate={handleUpdateMateriaConfirm}
       />
     </Container>
+
+    
   );
+  
 }

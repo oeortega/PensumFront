@@ -39,6 +39,12 @@ export default function HeaderForm({ header, setHeader, setHeaderValid, onSubmit
     reset(header);
   }, [header, reset]);
 
+  // Sincroniza el estado global header con cada cambio en el formulario
+  const handleChange = (field) => (e) => {
+    setValue(field, e.target.value, { shouldValidate: true });
+    setHeader(h => ({ ...h, [field]: e.target.value }));
+  };
+
   const onSubmit = React.useCallback((data) => {
     setHeader(data);
     setOpenSnackbar(true);
@@ -96,7 +102,7 @@ export default function HeaderForm({ header, setHeader, setHeaderValid, onSubmit
             label="Tipo de Documento"
             value={tipoDocValue}
             {...register("tipoDoc", { required: "Seleccione el tipo de documento" })}
-            onChange={e => setValue("tipoDoc", e.target.value, { shouldValidate: true })}
+            onChange={handleChange("tipoDoc")}
             sx={{ fontSize: "1.1rem" }}
           >
             <MenuItem value=""><em>Seleccione...</em></MenuItem>
@@ -123,6 +129,7 @@ export default function HeaderForm({ header, setHeader, setHeaderValid, onSubmit
             minLength: { value: 8, message: "Mínimo 8 dígitos" },
             maxLength: { value: 10, message: "Máximo 10 dígitos" }
           })}
+          onChange={handleChange("cedula")}
           error={Boolean(errors.cedula)}
           helperText={errors.cedula?.message || "Ingrese solo números (8-10 dígitos)"}
           fullWidth
@@ -139,6 +146,7 @@ export default function HeaderForm({ header, setHeader, setHeaderValid, onSubmit
               message: "Solo letras y espacios"
             }
           })}
+          onChange={handleChange("nombre")}
           error={Boolean(errors.nombre)}
           helperText={errors.nombre?.message || "Solo letras y espacios"}
           fullWidth
