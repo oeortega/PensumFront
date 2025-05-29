@@ -17,7 +17,6 @@ import {
 export default function ResultadosHomologacion({ resultados, onVolver }) {
   if (!resultados) return null;
 
-  // Construir el header y materias para el PDF
   const header = {
     nombre: resultados.nombre,
     cedula: resultados.cedula,
@@ -25,31 +24,27 @@ export default function ResultadosHomologacion({ resultados, onVolver }) {
     creditosFaltantes: resultados.creditosFaltantes
   };
 
- const materiasHomologadas = resultados.detalleHomologacion?.map(h => ({
-  asignaturaAntigua: h.asignatura_antigua,
-  asignaturaNueva: h.nombre_nueva,
-  nota: h.nota
-}));
-
-  console.log(resultados.detalleHomologacion)
-
-
+  const materiasHomologadas = resultados.detalleHomologacion?.map(h => ({
+    asignaturaAntigua: h.asignatura_antigua,
+    asignaturaNueva: h.nombre_nueva,
+    nota: h.nota
+  }));
 
   return (
     <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
       <Typography variant="h5" gutterBottom sx={{ color: "#27ae60", fontWeight: "bold" }}>
         Resultados de Homologación
       </Typography>
-      
+
       <Typography variant="subtitle1" gutterBottom>
         Estudiante: <strong>{resultados.nombre}</strong>
       </Typography>
       <Typography variant="subtitle1" gutterBottom>
         Documento: <strong>{resultados.cedula}</strong>
       </Typography>
-      
+
       <Divider sx={{ my: 2 }} />
-      
+
       <Box sx={{ display: "flex", gap: 4, mb: 3, flexWrap: "wrap" }}>
         <Paper elevation={1} sx={{ p: 2, minWidth: 200, textAlign: "center" }}>
           <Typography variant="h6" sx={{ color: "#27ae60" }}>
@@ -59,7 +54,6 @@ export default function ResultadosHomologacion({ resultados, onVolver }) {
             {resultados.creditosHomologados}
           </Typography>
         </Paper>
-        
         <Paper elevation={1} sx={{ p: 2, minWidth: 200, textAlign: "center" }}>
           <Typography variant="h6" sx={{ color: "#e74c3c" }}>
             Créditos faltantes
@@ -69,7 +63,7 @@ export default function ResultadosHomologacion({ resultados, onVolver }) {
           </Typography>
         </Paper>
       </Box>
-      
+
       {resultados.materiasFaltantes && resultados.materiasFaltantes.length > 0 && (
         <>
           <Typography variant="h6" gutterBottom>
@@ -95,7 +89,7 @@ export default function ResultadosHomologacion({ resultados, onVolver }) {
           </TableContainer>
         </>
       )}
-      
+
       <Typography variant="h6" gutterBottom>
         Detalle de homologación:
       </Typography>
@@ -117,8 +111,6 @@ export default function ResultadosHomologacion({ resultados, onVolver }) {
                   <TableCell>{h.nota}</TableCell>
                 </TableRow>
               ))
-            
-              
             ) : (
               <TableRow>
                 <TableCell colSpan={3} align="center">No hay homologaciones realizadas.</TableCell>
@@ -128,22 +120,43 @@ export default function ResultadosHomologacion({ resultados, onVolver }) {
         </Table>
       </TableContainer>
 
-      {/* Botón de descargar PDF */}
-      <Box display="flex" justifyContent="center" my={2}>
-        <GenerarPdfButton header={header} materias={materiasHomologadas} />
+      {/* Ambos botones alineados y con mismo diseño */}
+      <Box display="flex" justifyContent="center" gap={2} my={3} flexWrap="wrap">
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={null}
+          sx={{
+            minWidth: 210,
+            fontWeight: "bold",
+            fontSize: "1.1rem",
+            backgroundColor: "#27ae60",
+            '&:hover': { backgroundColor: "#219653" },
+            px: 3, py: 1.5
+          }}
+          // forward ref props if needed
+          component={GenerarPdfButton}
+          header={header}
+          materias={materiasHomologadas}
+        >
+          Descargar PDF
+        </Button>
+        <Button
+          variant="contained"
+          color="success"
+          sx={{
+            minWidth: 210,
+            fontWeight: "bold",
+            fontSize: "1.1rem",
+            backgroundColor: "#27ae60",
+            '&:hover': { backgroundColor: "#219653" },
+            px: 3, py: 1.5
+          }}
+          onClick={onVolver}
+        >
+          Volver a editar
+        </Button>
       </Box>
-      
-      <Button
-        variant="contained"
-        onClick={onVolver}
-        sx={{ 
-          mt: 3,
-          backgroundColor: "#27ae60",
-          '&:hover': { backgroundColor: "#219653" }
-        }}
-      >
-        Volver a editar
-      </Button>
     </Paper>
   );
 }
