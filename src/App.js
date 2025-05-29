@@ -14,6 +14,7 @@ export default function App() {
     nombre: ""
   });
   const [headerValid, setHeaderValid] = useState(false);
+  const [submitHeader, setSubmitHeader] = useState(null); // <-- NUEVO
   const [materias, setMaterias] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
@@ -71,6 +72,7 @@ export default function App() {
         header={header}
         setHeader={setHeader}
         setHeaderValid={setHeaderValid}
+        onSubmitHeaderReady={setSubmitHeader} // <-- NUEVO
       />
 
       <HomologacionTable
@@ -86,6 +88,7 @@ export default function App() {
           header={header}
           materias={materias}
           setResultados={setResultados}
+          submitHeader={submitHeader} // <-- NUEVO
         />
       </Box>
 

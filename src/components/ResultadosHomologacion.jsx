@@ -25,11 +25,15 @@ export default function ResultadosHomologacion({ resultados, onVolver }) {
     creditosFaltantes: resultados.creditosFaltantes
   };
 
-  const materiasHomologadas = resultados.detalleHomologacion?.map(h => ({
-    asignaturaAntigua: h.asignaturaAntigua,
-    asignaturaNueva: h.nombreNueva,
-    nota: h.nota
-  }));
+ const materiasHomologadas = resultados.detalleHomologacion?.map(h => ({
+  asignaturaAntigua: h.asignatura_antigua,
+  asignaturaNueva: h.nombre_nueva,
+  nota: h.nota
+}));
+
+  console.log(resultados.detalleHomologacion)
+
+
 
   return (
     <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
@@ -113,6 +117,8 @@ export default function ResultadosHomologacion({ resultados, onVolver }) {
                   <TableCell>{h.nota}</TableCell>
                 </TableRow>
               ))
+            
+              
             ) : (
               <TableRow>
                 <TableCell colSpan={3} align="center">No hay homologaciones realizadas.</TableCell>

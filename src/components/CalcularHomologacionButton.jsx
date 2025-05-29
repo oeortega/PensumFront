@@ -1,22 +1,24 @@
 import React from "react";
 import Button from "@mui/material/Button";
 
-export default function CalcularHomologacionButton({ header, materias, setResultados }) {
+export default function CalcularHomologacionButton({ header, materias, setResultados, submitHeader }) {
   const handleCalcular = async () => {
-    // Aquí se adapta el nombre de la propiedad para el backend
+   
+
     const payload = {
-      tipo_documento: header.tipoDoc, // <-- CAMBIO AQUÍ
-      cedula: header.cedula,
-      nombre: header.nombre,
-       materias_antiguas: materias.map(mat => ({
-       nombre: String(mat.nombre),
-       nota: Number(mat.nota),
-  })),
+      tipo_documento: header.tipoDoc || "",
+      cedula: header.cedula || "",
+      nombre: header.nombre || "",
+      materias_antiguas: materias.map(mat => ({
+        nombre: String(mat.nombre),
+        semestre: Number(mat.semestre),
+        nota: Number(mat.nota),
+      })),
     };
-       
+
+    console.log("Payload enviado:", payload);
+
     try {
-      console.log("Payload enviado:", payload);
-      alert("JSON que se enviará:\n" + JSON.stringify(payload, null, 2));
       const response = await fetch("https://backend-pensum-front.onrender.com/homologacion/calcular", {
         method: "POST",
         headers: {
@@ -44,7 +46,7 @@ export default function CalcularHomologacionButton({ header, materias, setResult
       creditosHomologados: data.creditos_homologados || data.creditosHomologados || 0,
       creditosFaltantes: data.creditos_faltantes || data.creditosFaltantes || 0,
       materiasFaltantes: data.materias_faltantes || data.materiasFaltantes || [],
-      detalleHomologacion: data.detalle_homologacion || data.detalleHomologacion || []
+      detalleHomologacion: data.detalle_homologacion || data.detalleHomologacion || [],
     };
   }
 

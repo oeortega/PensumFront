@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   TextField,
@@ -20,7 +20,7 @@ const tiposDoc = [
   { value: "CE", label: "Cédula de Extranjería" }
 ];
 
-export default function HeaderForm({ header, setHeader, setHeaderValid }) {
+export default function HeaderForm({ header, setHeader, setHeaderValid, onSubmitHeaderReady }) {
   const {
     register,
     handleSubmit,
@@ -34,7 +34,6 @@ export default function HeaderForm({ header, setHeader, setHeaderValid }) {
   });
 
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const autoSubmitted = useRef(false);
 
   useEffect(() => {
     reset(header);
@@ -45,16 +44,17 @@ export default function HeaderForm({ header, setHeader, setHeaderValid }) {
     setOpenSnackbar(true);
   }, [setHeader]);
 
+  // Exponemos la función para que el padre la use cuando quiera
+  useEffect(() => {
+    if (onSubmitHeaderReady) {
+      onSubmitHeaderReady(() => handleSubmit(onSubmit));
+    }
+  }, [handleSubmit, onSubmit, onSubmitHeaderReady]);
+
+  // Validación en vivo
   useEffect(() => {
     setHeaderValid(isValid);
-    if (isValid && !autoSubmitted.current) {
-      autoSubmitted.current = true;
-      handleSubmit(onSubmit)();
-    }
-    if (!isValid) {
-      autoSubmitted.current = false;
-    }
-  }, [isValid, handleSubmit, onSubmit, setHeaderValid]);
+  }, [isValid, setHeaderValid]);
 
   const tipoDocValue = watch("tipoDoc") || "";
 
@@ -145,7 +145,6 @@ export default function HeaderForm({ header, setHeader, setHeaderValid }) {
         />
       </form>
 
-      {/* Snackbar de confirmación */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={3000}
