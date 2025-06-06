@@ -14,7 +14,7 @@ export default function App() {
     nombre: ""
   });
 
-  console.log("HEADER EN BOTÓN:", header);
+  
   const [headerValid, setHeaderValid] = useState(false);
   const [submitHeader, setSubmitHeader] = useState(null);
   const [materias, setMaterias] = useState([]);
