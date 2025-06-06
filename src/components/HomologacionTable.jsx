@@ -26,6 +26,7 @@ import { useTheme } from "@mui/material/styles";
  * - headerValid: booleano, true si los datos personales son válidos
  * - onUpdate: función (idx) para actualizar una materia
  * - onDelete: función (idx) para eliminar una materia
+ * - duplicateWarning: string, advertencia de materia duplicada (opcional)
  */
 export default function HomologacionTable({
   materias,
@@ -33,6 +34,7 @@ export default function HomologacionTable({
   headerValid,
   onUpdate,
   onDelete,
+  duplicateWarning // <-- nueva prop
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -66,6 +68,12 @@ export default function HomologacionTable({
           >
             {addButtonText}
           </Button>
+          {/* Advertencia de duplicado */}
+          {duplicateWarning && (
+            <Typography color="error" sx={{ mb: 2, fontWeight: "bold" }}>
+              {duplicateWarning}
+            </Typography>
+          )}
           {materias.length === 0 ? (
             <Typography align="center" sx={{ color: "#999" }}>
               No hay materias agregadas.
@@ -149,6 +157,12 @@ export default function HomologacionTable({
         >
           {addButtonText}
         </Button>
+        {/* Advertencia de duplicado */}
+        {duplicateWarning && (
+          <Typography color="error" sx={{ mb: 2, fontWeight: "bold" }}>
+            {duplicateWarning}
+          </Typography>
+        )}
         <TableContainer>
           <Table size="small">
             <TableHead>

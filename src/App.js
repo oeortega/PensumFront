@@ -16,18 +16,22 @@ export default function App() {
 
   console.log("HEADER EN BOTÓN:", header);
   const [headerValid, setHeaderValid] = useState(false);
-  const [submitHeader, setSubmitHeader] = useState(null); // <-- NUEVO
+  const [submitHeader, setSubmitHeader] = useState(null);
   const [materias, setMaterias] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [materiaToEdit, setMateriaToEdit] = useState(null);
-  const [resultados, setResultados] = useState(null); // <-- Estado para la respuesta
+  const [resultados, setResultados] = useState(null);
+
+  // Nueva advertencia para duplicados
+  const [duplicateWarning, setDuplicateWarning] = useState("");
 
   // Abrir modal para agregar
   const handleAddMateriaClick = () => {
     setEditIndex(null);
     setMateriaToEdit(null);
     setModalOpen(true);
+    setDuplicateWarning(""); // Limpiar advertencia al abrir
   };
 
   // Abrir modal para editar
@@ -35,24 +39,49 @@ export default function App() {
     setEditIndex(idx);
     setMateriaToEdit(materias[idx]);
     setModalOpen(true);
+    setDuplicateWarning(""); // Limpiar advertencia
   };
 
   // Eliminar materia
   const handleDeleteMateria = (idx) => {
     setMaterias(prev => prev.filter((_, i) => i !== idx));
+    setDuplicateWarning(""); // Limpiar advertencia
   };
 
-  // Agregar nueva materia
+  // Agregar nueva materia con control de duplicados
   const handleAddMateria = (materia) => {
+    const exists = materias.some(
+      (m) =>
+        m.id.toLowerCase() === materia.id.toLowerCase() ||
+        m.nombre.toLowerCase() === materia.nombre.toLowerCase()
+    );
+    if (exists) {
+      setDuplicateWarning("¡La materia ya existe en la tabla!");
+      setModalOpen(false); // Opcional: cerrar modal si es duplicado
+      return;
+    }
     setMaterias(prev => [...prev, materia]);
+    setDuplicateWarning("");
     setModalOpen(false);
   };
 
-  // Actualizar materia existente
+  // Actualizar materia existente con control de duplicados
   const handleUpdateMateriaConfirm = (materiaActualizada, idx) => {
+    const exists = materias.some(
+      (m, i) =>
+        i !== idx &&
+        (m.id.toLowerCase() === materiaActualizada.id.toLowerCase() ||
+         m.nombre.toLowerCase() === materiaActualizada.nombre.toLowerCase())
+    );
+    if (exists) {
+      setDuplicateWarning("¡La materia ya existe en la tabla !");
+      setModalOpen(false); // Opcional: cerrar modal si es duplicado
+      return;
+    }
     setMaterias(prev =>
       prev.map((mat, i) => (i === idx ? materiaActualizada : mat))
     );
+    setDuplicateWarning("");
     setModalOpen(false);
   };
 
@@ -74,7 +103,7 @@ export default function App() {
         header={header}
         setHeader={setHeader}
         setHeaderValid={setHeaderValid}
-        onSubmitHeaderReady={setSubmitHeader} // <-- NUEVO
+        onSubmitHeaderReady={setSubmitHeader}
       />
 
       <HomologacionTable
@@ -83,6 +112,7 @@ export default function App() {
         headerValid={headerValid}
         onUpdate={handleUpdateMateria}
         onDelete={handleDeleteMateria}
+        duplicateWarning={duplicateWarning} 
       />
 
       <Box display="flex" justifyContent="center">
@@ -90,8 +120,7 @@ export default function App() {
           header={header}
           materias={materias}
           setResultados={setResultados}
-          submitHeader={submitHeader} 
-          // <-- NUEVO
+          submitHeader={submitHeader}
         />
       </Box>
 
@@ -104,8 +133,5 @@ export default function App() {
         onUpdate={handleUpdateMateriaConfirm}
       />
     </Container>
-
-    
   );
-  
 }
